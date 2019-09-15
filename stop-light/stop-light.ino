@@ -24,18 +24,21 @@ void redOn() {
   color = "red";
   Serial.println("Turning red light on");
   server.send(200, "application/json", getColorJson(color));
+  logRequest("POST", "/api/set-red", "200");
 }
 
 void yellowOn() {
   color = "yellow";
   Serial.println("Turning yellow light on");
   server.send(200, "application/json", getColorJson(color));
+  logRequest("POST", "/api/set-yellow", "200");
 }
 
 void greenOn() {
   color = "green";
   Serial.println("Turning green light on");
   server.send(200, "application/json", getColorJson(color));
+  logRequest("POST", "/api/set-green", "200");
 }
 
 String getColorJson(String _color) {

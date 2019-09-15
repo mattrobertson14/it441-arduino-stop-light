@@ -17,6 +17,14 @@ void rootPage() {
   logRequest("GET", "/", "200", "");
 }
 
+void notFound() {
+  server.sendHeader("Location", "/", true);
+  server.send(302, "text/plain", "");
+  String reqURI = server.uri();
+  String reqType = (server.method() == HTTP_GET)? "GET" : "POST";
+  logRequest(reqType, reqURI, "302", "Rerouted to \"/\"");
+}
+
 void getStatus() {
   server.send(200, "application/json", getColorJson(color));
 }
@@ -80,6 +88,8 @@ void setup() {
   server.on("/api/set-red", HTTP_POST, redOn);
   server.on("/api/set-yellow", HTTP_POST, yellowOn);
   server.on("/api/set-green", HTTP_POST, greenOn);
+
+  server.onNotFound(notFound);
 
   server.begin();
   Serial.print("Web Server Listening on Port ");

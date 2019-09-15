@@ -14,6 +14,7 @@ ESP8266WebServer server(port);
 
 void rootPage() {
   server.send(200, "text/html", HOME_page);
+  logRequest("GET", "/", "200");
 }
 
 void getStatus() {

@@ -118,15 +118,48 @@ const char HOME_page[] PROGMEM = R"=====(
           }
         }
       </style>
+      <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+      <script type="text/javascript">
+
+        $(document).ready(function() {
+          checkStatus()
+        })
+            
+        function setLight(color){
+          $(`.light:not(.${color})`).removeClass('on');
+          $(`.${color}`).addClass('on');        
+        }
+
+        function checkStatus(){
+          $.ajax({
+            url: '/api/status',
+            type: "GET",
+            success: function(data) {
+              setLight(data.color);
+              setTimeout(checkStatus, 1000);
+            }
+          })
+        }
+
+        function changeLight(color){
+          $.ajax({
+            url: `/api/set-${color}`,
+            type: "POST",
+            success: function(data) {
+              setLight(data.color);
+            }
+          }) 
+        }        
+      </script>
     </head>
     <body>
       <div id="root">
         <div class="App">
           <h1>Stoplight</h1>
           <div class="stoplight">
-            <div class="light red"></div>
-            <div class="light yellow"></div>
-            <div class="light green"></div>    
+            <div class="light red" onclick="changeLight('red')"></div>
+            <div class="light yellow" onclick="changeLight('yellow')"></div>
+            <div class="light green" onclick="changeLight('green')"></div>    
           </div>
           <button onclick="alert('Turn off lights')">TURN OFF</button>
           <button onclick="alert('Cycling Lights')">AUTO MODE</button>

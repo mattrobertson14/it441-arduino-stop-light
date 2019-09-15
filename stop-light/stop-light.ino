@@ -68,7 +68,8 @@ void logRequest(String request_status, String additional_info) {
   String clientIP = server.client().remoteIP().toString();
   String reqType = (server.method() == HTTP_GET)? "GET" : "POST";
   String reqURI = server.uri();
-  String msg = clientIP + "\t" + reqType + "\t" + request_status + "\t" + reqURI + "\t" + additional_info;
+  String addInfoTabs = (reqURI.length() < 10)? "\t\t" : "\t";
+  String msg = clientIP + "\t" + reqType + "\t" + request_status + "\t" + reqURI + addInfoTabs + additional_info;
   Serial.println(msg);
 }
 

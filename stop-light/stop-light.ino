@@ -14,7 +14,7 @@ ESP8266WebServer server(port);
 
 void rootPage() {
   server.send(200, "text/html", HOME_page);
-  logRequest("GET", "/", "200");
+  logRequest("GET", "/", "200", "");
 }
 
 void getStatus() {
@@ -22,24 +22,27 @@ void getStatus() {
 }
 
 void redOn() {
+  String old_color = color;
   color = "red";
-  Serial.println("Turning red light on");
+  String msg = "Changed light from " + old_color + " to " + color;
   server.send(200, "application/json", getColorJson(color));
-  logRequest("POST", "/api/set-red", "200");
+  logRequest("POST", "/api/set-red", "200", msg);
 }
 
 void yellowOn() {
+  String old_color = color;
   color = "yellow";
-  Serial.println("Turning yellow light on");
+  String msg = "Changed light from " + old_color + " to " + color;
   server.send(200, "application/json", getColorJson(color));
-  logRequest("POST", "/api/set-yellow", "200");
+  logRequest("POST", "/api/set-yellow", "200", msg);
 }
 
 void greenOn() {
+  String old_color = color;
   color = "green";
-  Serial.println("Turning green light on");
+  String msg = "Changed light from " + old_color + " to " + color;
   server.send(200, "application/json", getColorJson(color));
-  logRequest("POST", "/api/set-green", "200");
+  logRequest("POST", "/api/set-green", "200", msg);
 }
 
 String getColorJson(String _color) {
@@ -47,9 +50,9 @@ String getColorJson(String _color) {
   return res;
 }
 
-void logRequest(String request_type, String request, String request_status) {
+void logRequest(String request_type, String request, String request_status, String additional_info) {
   String clientIP = server.client().remoteIP().toString();
-  String msg = request_type + "\t" + request_status + "\t" + request;
+  String msg = clientIP + "\t" + request_type + "\t" + request_status + "\t" + request + "\t" + additional_info;
   Serial.println(msg);
 }
 

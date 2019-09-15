@@ -160,6 +160,16 @@ const char HOME_page[] PROGMEM = R"=====(
             }
           })
         }
+
+        function autoMode(){
+          $.ajax({
+            url: '/api/cycle',
+            type: "POST",
+            success: function(data) {
+              setLight(data.color);
+            }
+          })
+        }
       </script>
     </head>
     <body>
@@ -172,7 +182,7 @@ const char HOME_page[] PROGMEM = R"=====(
             <div class="light green" onclick="changeLight('green')"></div>    
           </div>
           <button onclick="lightsOut()">TURN OFF</button>
-          <button onclick="alert('Cycling Lights')">AUTO MODE</button>
+          <button onclick="autoMode()">AUTO MODE</button>
         </div>
       </div>
     </body>

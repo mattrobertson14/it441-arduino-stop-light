@@ -14,15 +14,13 @@ ESP8266WebServer server(port);
 
 void rootPage() {
   server.send(200, "text/html", HOME_page);
-  logRequest("GET", "/", "200", "");
+  logRequest("200", "");
 }
 
 void notFound() {
   server.sendHeader("Location", "/", true);
   server.send(302, "text/plain", "");
-  String reqURI = server.uri();
-  String reqType = (server.method() == HTTP_GET)? "GET" : "POST";
-  logRequest(reqType, reqURI, "302", "Rerouted to \"/\"");
+  logRequest("302", "Rerouted to \"/\"");
 }
 
 void getStatus() {
@@ -34,7 +32,7 @@ void redOn() {
   color = "red";
   String msg = "Changed light from " + old_color + " to " + color;
   server.send(200, "application/json", getColorJson(color));
-  logRequest("POST", "/api/set-red", "200", msg);
+  logRequest("200", msg);
 }
 
 void yellowOn() {
@@ -42,7 +40,7 @@ void yellowOn() {
   color = "yellow";
   String msg = "Changed light from " + old_color + " to " + color;
   server.send(200, "application/json", getColorJson(color));
-  logRequest("POST", "/api/set-yellow", "200", msg);
+  logRequest("200", msg);
 }
 
 void greenOn() {
@@ -50,7 +48,15 @@ void greenOn() {
   color = "green";
   String msg = "Changed light from " + old_color + " to " + color;
   server.send(200, "application/json", getColorJson(color));
-  logRequest("POST", "/api/set-green", "200", msg);
+  logRequest("200", msg);
+}
+
+void turnOffLights() {
+  String old_color = color;
+  color = "off";
+  String msg = "Changed light from " + old_color + " to " + color;
+  server.send(200, "application/json", getColorJson(color));
+  logRequest("200", msg);
 }
 
 String getColorJson(String _color) {
@@ -58,9 +64,11 @@ String getColorJson(String _color) {
   return res;
 }
 
-void logRequest(String request_type, String request, String request_status, String additional_info) {
+void logRequest(String request_status, String additional_info) {
   String clientIP = server.client().remoteIP().toString();
-  String msg = clientIP + "\t" + request_type + "\t" + request_status + "\t" + request + "\t" + additional_info;
+  String reqType = (server.method() == HTTP_GET)? "GET" : "POST";
+  String reqURI = server.uri();
+  String msg = clientIP + "\t" + reqType + "\t" + request_status + "\t" + reqURI + "\t" + additional_info;
   Serial.println(msg);
 }
 
@@ -88,6 +96,7 @@ void setup() {
   server.on("/api/set-red", HTTP_POST, redOn);
   server.on("/api/set-yellow", HTTP_POST, yellowOn);
   server.on("/api/set-green", HTTP_POST, greenOn);
+  server.on("/api/lights-out", HTTP_POST, turnOffLights);
 
   server.onNotFound(notFound);
 

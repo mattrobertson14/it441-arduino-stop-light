@@ -149,7 +149,17 @@ const char HOME_page[] PROGMEM = R"=====(
               setLight(data.color);
             }
           }) 
-        }        
+        }
+
+        function lightsOut(){
+          $.ajax({
+            url: '/api/lights-out',
+            type: "POST",
+            success: function(data){
+              setLight(data.color);
+            }
+          })
+        }
       </script>
     </head>
     <body>
@@ -161,7 +171,7 @@ const char HOME_page[] PROGMEM = R"=====(
             <div class="light yellow" onclick="changeLight('yellow')"></div>
             <div class="light green" onclick="changeLight('green')"></div>    
           </div>
-          <button onclick="alert('Turn off lights')">TURN OFF</button>
+          <button onclick="lightsOut()">TURN OFF</button>
           <button onclick="alert('Cycling Lights')">AUTO MODE</button>
         </div>
       </div>

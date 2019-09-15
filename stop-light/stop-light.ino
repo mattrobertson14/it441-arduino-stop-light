@@ -20,14 +20,33 @@ void getStatus() {
   server.send(200, "application/json", getColorJson(color));
 }
 
-void changeLight(String _color){
-  color = _color;
+void redOn() {
+  color = "red";
+  Serial.println("Turning red light on");
+  server.send(200, "application/json", getColorJson(color));
+}
+
+void yellowOn() {
+  color = "yellow";
+  Serial.println("Turning yellow light on");
+  server.send(200, "application/json", getColorJson(color));
+}
+
+void greenOn() {
+  color = "green";
+  Serial.println("Turning green light on");
   server.send(200, "application/json", getColorJson(color));
 }
 
 String getColorJson(String _color) {
   String res = "{ \"color\": \"" + _color + "\"}";
   return res;
+}
+
+void logRequest(String request_type, String request, String request_status) {
+  String clientIP = server.client().remoteIP().toString();
+  String msg = request_type + "\t" + request_status + "\t" + request;
+  Serial.println(msg);
 }
 
 void setup() {
@@ -51,9 +70,9 @@ void setup() {
 
   server.on("/", HTTP_GET, rootPage);
   server.on("/api/status", HTTP_GET, getStatus);
-  server.on("/api/set-red", HTTP_POST, changeLight("red"));
-  server.on("/api/set-yellow", HTTP_POST, changeLight("yellow"));
-  server.on("/api/set-green", HTTP_POST, changeLight("green"));
+  server.on("/api/set-red", HTTP_POST, redOn);
+  server.on("/api/set-yellow", HTTP_POST, yellowOn);
+  server.on("/api/set-green", HTTP_POST, greenOn);
 
   server.begin();
   Serial.print("Web Server Listening on Port ");

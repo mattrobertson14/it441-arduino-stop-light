@@ -8,7 +8,10 @@ const char* ssid = "TP-LINK_E582";
 const char* password = HOME_WIFI_PASSWORD;
 const int port = HTTP_PORT;
 
-String color = "off";
+int RED_LIGHT = D5;
+int YEL_LIGHT = D6;
+int GRN_LIGHT = D7;
+
 bool cycle = false;
 unsigned long currentTime;
 unsigned long prevTime = 0;
@@ -27,51 +30,73 @@ void notFound() {
 }
 
 void getStatus() {
+  String color = getLED();
   server.send(200, "application/json", getColorJson(color));
 }
 
 void redOn() {
   cycle = false;
-  String old_color = color;
-  color = "red";
-  String msg = "Changed light from " + old_color + " to " + color;
-  server.send(200, "application/json", getColorJson(color));
+  String old_color = getLED();
+  setLED("red");
+  String new_color = getLED();
+  String msg = "Changed light from " + old_color + " to " + new_color;
+  server.send(200, "application/json", getColorJson(new_color));
   logRequest("200", msg);
 }
 
 void yellowOn() {
   cycle = false;
-  String old_color = color;
-  color = "yellow";
-  String msg = "Changed light from " + old_color + " to " + color;
-  server.send(200, "application/json", getColorJson(color));
+  String old_color = getLED();
+  setLED("yellow");
+  String new_color = getLED();
+  String msg = "Changed light from " + old_color + " to " + new_color;
+  server.send(200, "application/json", getColorJson(new_color));
   logRequest("200", msg);
 }
 
 void greenOn() {
   cycle = false;
-  String old_color = color;
-  color = "green";
-  String msg = "Changed light from " + old_color + " to " + color;
-  server.send(200, "application/json", getColorJson(color));
+  String old_color = getLED();
+  setLED("green");
+  String new_color = getLED();
+  String msg = "Changed light from " + old_color + " to " + new_color;
+  server.send(200, "application/json", getColorJson(new_color));
   logRequest("200", msg);
 }
 
 void turnOffLights() {
   cycle = false;
-  String old_color = color;
-  color = "off";
-  String msg = "Changed light from " + old_color + " to " + color;
-  server.send(200, "application/json", getColorJson(color));
+  String old_color = getLED();
+  setLED("off");
+  String new_color = getLED();
+  String msg = "Changed light from " + old_color + " to " + new_color;
+  server.send(200, "application/json", getColorJson(new_color));
   logRequest("200", msg);
 }
 
 void cycleLights() {
-  color = "red";
+  setLED("red");
   prevTime = millis();
   cycle = true;
+  String color = getLED();
   server.send(200, "application/json", getColorJson(color));
   logRequest("200", "Turned on Auto Mode");
+}
+
+void setLED(String color) {
+  digitalWrite(RED_LIGHT, (color == "red"));
+  digitalWrite(YEL_LIGHT, (color == "yellow"));
+  digitalWrite(GRN_LIGHT, (color == "green"));
+}
+
+String getLED() {
+  String res = "";
+
+  if (digitalRead(RED_LIGHT)) return "red";
+  if (digitalRead(YEL_LIGHT)) return "yellow";
+  if (digitalRead(GRN_LIGHT)) return "green";
+
+  return "off";
 }
 
 String getColorJson(String _color) {
@@ -120,6 +145,10 @@ void setup() {
   server.begin();
   Serial.print("Web Server Listening on Port ");
   Serial.println(port);
+
+  pinMode(RED_LIGHT, OUTPUT);
+  pinMode(YEL_LIGHT, OUTPUT);
+  pinMode(GRN_LIGHT, OUTPUT);
 }
 
 void loop() {
@@ -127,8 +156,8 @@ void loop() {
 
   currentTime = (millis() - prevTime)/1000;
 
-  if (cycle && currentTime < 5) color = "red";
-  if (cycle && currentTime >= 5 && currentTime < 10) color = "green";
-  if (cycle && currentTime >= 10 && currentTime < 12.5) color = "yellow";
+  if (cycle && currentTime < 5) setLED("red");
+  if (cycle && currentTime >= 5 && currentTime < 10) setLED("green");
+  if (cycle && currentTime >= 10 && currentTime < 12.5) setLED("yellow");
   if (cycle && currentTime >= 12.5) prevTime = millis();
 }

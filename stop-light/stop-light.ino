@@ -1,12 +1,12 @@
 #include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
 #include <ESP8266WebServer.h>
 #include <WiFiClient.h>
 #include "config.h"
 #include "html.h"
 
-const char* ssid = "BYU-WiFi";
-const char* password = BYU_WIFI_PASSWORD;
-const int port = HTTP_PORT;
+ESP8266WiFiMulti wifiMulti;
+ESP8266WebServer server(HTTP_PORT);
 
 int RED_LIGHT = D5;
 int YEL_LIGHT = D6;
@@ -16,7 +16,23 @@ bool cycle = false;
 unsigned long currentTime;
 unsigned long prevTime = 0;
 
-ESP8266WebServer server(port);
+void connectToWifi(){
+  WiFi.mode(WIFI_STA);
+  wifiMulti.addAP(HOME_WIFI_SSID, HOME_WIFI_PASSWORD);
+  wifiMulti.addAP(BYU_WIFI_SSID, BYU_WIFI_PASSWORD);
+
+  Serial.print("Connecting");
+  while (WiFi.status() != WL_CONNECTED){
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+
+  Serial.print("Connected to ");
+  Serial.print(WiFi.SSID());
+  Serial.print(", IP Address: ");
+  Serial.println(WiFi.localIP());
+}
 
 void rootPage() {
   server.send(200, "text/html", HOME_page);
@@ -116,22 +132,7 @@ void logRequest(String request_status, String additional_info) {
 void setup() {
 
   Serial.begin(115200);
-  Serial.println("----------------------------------");
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-
-  Serial.print("Connecting");
-  while (WiFi.status() != WL_CONNECTED){
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println();
-
-  Serial.print("Connected to ");
-  Serial.print(ssid);
-  Serial.print(", IP Address: ");
-  Serial.println(WiFi.localIP());
+  connectToWifi();
 
   server.on("/", HTTP_GET, rootPage);
   server.on("/api/status", HTTP_GET, getStatus);

@@ -5,8 +5,11 @@
 #include "config.h"
 #include "html.h"
 
-ESP8266WiFiMulti wifiMulti;
-ESP8266WebServer server(HTTP_PORT);
+const int port = HTTP_PORT;
+const char* ssid1 = HOME_WIFI_SSID;
+const char* passwd1 = HOME_WIFI_PASSWORD;
+const char* ssid2 = MATT_HOTSPOT_SSID;
+const char* passwd2 = MATT_HOTSPOT_PASSWORD;
 
 int RED_LIGHT = D5;
 int YEL_LIGHT = D6;
@@ -16,23 +19,8 @@ bool cycle = false;
 unsigned long currentTime;
 unsigned long prevTime = 0;
 
-void connectToWifi(){
-  WiFi.mode(WIFI_STA);
-  wifiMulti.addAP(HOME_WIFI_SSID, HOME_WIFI_PASSWORD);
-  wifiMulti.addAP(BYU_WIFI_SSID, BYU_WIFI_PASSWORD);
-
-  Serial.print("Connecting");
-  while (WiFi.status() != WL_CONNECTED){
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println();
-
-  Serial.print("Connected to ");
-  Serial.print(WiFi.SSID());
-  Serial.print(", IP Address: ");
-  Serial.println(WiFi.localIP());
-}
+ESP8266WiFiMulti wifiMulti;
+ESP8266WebServer server(port);
 
 void rootPage() {
   server.send(200, "text/html", HOME_page);
@@ -132,7 +120,22 @@ void logRequest(String request_status, String additional_info) {
 void setup() {
 
   Serial.begin(115200);
-  connectToWifi();
+  WiFi.mode(WIFI_STA);
+  wifiMulti.addAP(ssid1, passwd1);
+  wifiMulti.addAP(ssid2, passwd2);
+  
+  Serial.print("\nConnecting");
+  
+  while (wifiMulti.run() != WL_CONNECTED){
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+
+  Serial.print("Connected to ");
+  Serial.print(WiFi.SSID());
+  Serial.print(", IP Address: ");
+  Serial.println(WiFi.localIP());
 
   server.on("/", HTTP_GET, rootPage);
   server.on("/api/status", HTTP_GET, getStatus);
@@ -141,12 +144,17 @@ void setup() {
   server.on("/api/set-green", HTTP_POST, greenOn);
   server.on("/api/lights-out", HTTP_POST, turnOffLights);
   server.on("/api/cycle", HTTP_POST, cycleLights);
+  server.on("/api/set-red", HTTP_GET, redOn);
+  server.on("/api/set-yellow", HTTP_GET, yellowOn);
+  server.on("/api/set-green", HTTP_GET, greenOn);
+  server.on("/api/lights-out", HTTP_GET, turnOffLights);
+  server.on("/api/cycle", HTTP_GET, cycleLights);
 
   server.onNotFound(notFound);
 
   server.begin();
   Serial.print("Web Server Listening on Port ");
-  Serial.println(port);
+  Serial.println(HTTP_PORT);
 
   pinMode(RED_LIGHT, OUTPUT);
   pinMode(YEL_LIGHT, OUTPUT);
@@ -156,10 +164,14 @@ void setup() {
 void loop() {
   server.handleClient();
 
+  if (wifiMulti.run() != WL_CONNECTED) {
+    Serial.println("WiFi not connected!");
+    delay(1000);
+  }
+
   currentTime = (millis() - prevTime)/1000;
 
-  if (cycle && currentTime < 5) setLED("red");
-  if (cycle && currentTime >= 5 && currentTime < 10) setLED("green");
-  if (cycle && currentTime >= 10 && currentTime < 12.5) setLED("yellow");
-  if (cycle && currentTime >= 12.5) prevTime = millis();
+  if (cycle && currentTime < 1) setLED("red");
+  if (cycle && currentTime >= 1 && currentTime < 2) setLED("off");
+  if (cycle && currentTime >= 2) prevTime = millis();
 }

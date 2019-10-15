@@ -4,8 +4,8 @@
 #include "config.h"
 #include "html.h"
 
-const char* ssid = "TP-LINK_E582";
-const char* password = HOME_WIFI_PASSWORD;
+const char* ssid = "BYU-WiFi";
+const char* password = BYU_WIFI_PASSWORD;
 const int port = HTTP_PORT;
 
 int RED_LIGHT = D5;
@@ -118,6 +118,7 @@ void setup() {
   Serial.begin(115200);
   Serial.println("----------------------------------");
 
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
   Serial.print("Connecting");
